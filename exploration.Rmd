@@ -9,40 +9,49 @@ output: html_document
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-loading dataset and tidyverse
-```{r}
-setwd('C:/Users/royba/OneDrive - University of California, Davis/Backup/Documents/github/BIS15W2022_eroybal/Class Project')
 
+Loading Packages
+```{r}
 library(tidyverse)
 library(naniar)
 library(janitor)
+```
 
-toxicity <- read.csv('toxicitydata_2022-01-07.csv')
 
-toxicity <- toxicity %>%
-  clean_names()
 
-head(toxicity)
+loading dataset 
+```{r}
+#toxicity <- read.csv('toxicitydata_2022-01-07.csv')
 
-toxicity_short <- toxicity %>%
-  filter(near(latitude, 38.73, tol = 1), near(longitude, -121.81, tol = 1))
-toxicity_short
+#toxicity <- toxicity %>%
+#  clean_names()
 
-toxicity_davis <- toxicity %>%
-  filter(str_detect(sample_agency, "University of California Davis-Aquatic Toxicology Lab"))
+#head(toxicity)
 
-nrow(toxicity_davis)
+#toxicity_short <- toxicity %>%
+#  filter(near(latitude, 38.73, tol = 1), near(longitude, #-121.81, tol = 1))
+#toxicity_short
 
-colnames(toxicity_davis)
+#toxicity_davis <- toxicity %>%
+#  filter(str_detect(sample_agency, "University of California Davis-Aquatic Toxicology Lab"))
 
-head
+#nrow(toxicity_davis)
 
-toxicity_davis <- toxicity_davis %>%
-  select(-c(station_code, location_code, sample_type_code, lab_sample_id, batch_verification_code, compliance_code, sample_comments, collection_comments, tox_test_comments, time_point_comments, tox_result_comments, tox_batch_comments, event_code, protocol_code, lab_submission_code, location_detail_wq_comments, sample_id))
+#colnames(toxicity_davis)
+
+#head
+
+#toxicity_davis <- toxicity_davis %>%
+#  select(-c(station_code, location_code, sample_type_code, lab_sample_id, batch_verification_code, compliance_code, sample_comments, collection_comments, tox_test_comments, time_point_comments, tox_result_comments, tox_batch_comments, event_code, protocol_code, lab_submission_code, location_detail_wq_comments, sample_id))
          
-table(toxicity_davis$sample_agency)
+#table(toxicity_davis$sample_agency)
 
-write.csv(toxicity_davis, file = "toxicity_davis.csv")
+#write.csv(toxicity_davis, file = "toxicity_davis.csv")
 
+```
+
+```{r}
+taxda <- readr::read_csv("toxicity_davis.csv")
+glimpse(taxda)
 ```
 
