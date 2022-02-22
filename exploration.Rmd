@@ -55,3 +55,49 @@ taxda <- readr::read_csv("toxicity_davis.csv")
 glimpse(taxda)
 ```
 
+```{r}
+taxda %>%
+  filter(latitude != -88) %>%
+  filter(longitude != -88) %>%
+  select(latitude, longitude) %>%
+  summary()
+```
+
+```{r}
+taxda_map <- taxda %>%
+  filter(latitude != -88) %>%
+  filter(longitude != -88) 
+```
+
+
+```{r}
+lat <- c(37.27 ,40.96)
+long <- c(-122.5  , -120.4 )
+bbox <- make_bbox(long, lat, f = 0.05)
+```
+
+```{r}
+map1 <- get_map(bbox, maptype = "terrain", source = "stamen")
+ggmap(map1)
+```
+```{r}
+ggmap(map1) + 
+  geom_point(data = taxda, aes(longitude, latitude)) +
+  labs(x = "Longitude", y = "Latitude", title = "Locations")
+```
+
+```{r}
+library(albersusa)
+us_comp <- usa_sf()
+cnty_comp <- counties_sf()
+
+ca_comp <- us_comp %>%
+  filter(name=="California")
+ca_cnty_comp <- cnty_comp %>% 
+  filter(state=="California")
+ggplot() +
+  geom_sf(data = ca_comp, size = 0.125)+
+  geom_sf(data = ca_cnty_comp, size = 0.125)+
+  geom_point(data = taxda_map, aes(longitude, latitude))
+```
+
