@@ -15,6 +15,7 @@ Loading Packages
 library(tidyverse)
 library(naniar)
 library(janitor)
+library(skimr)
 ```
 
 
@@ -99,5 +100,58 @@ ggplot() +
   geom_sf(data = ca_comp, size = 0.125)+
   geom_sf(data = ca_cnty_comp, size = 0.125)+
   geom_point(data = taxda_map, aes(longitude, latitude))
+```
+
+
+### Evan's data explorations (sorry for the mess)
+```{r}
+nrow(taxda)
+
+colnames(taxda)
+n_unique(taxda$station_name)
+n_unique(taxda$project)
+```
+
+```{r}
+project_frequency <- taxda %>%
+  select(project) %>%
+  ggplot(aes(x = project)) +
+  geom_bar() +
+  coord_flip()
+project_frequency
+```
+
+focusing on pelagic organism decline
+```{r}
+pelagic_org <- taxda %>%
+  filter(grepl('Pelagic', project))
+
+nrow(pelagic_org)
+
+#this makes up the majority of the data and could be used for a specific analysis that targets the ocean
+```
+
+```{r}
+taxda %>%
+  ggplot(aes(x = organism_name)) +
+  geom_bar() +
+  coord_flip()
+```
+Potential heat map for organism abundance?
+Could also focus on Hyalella azteca
+
+```{r}
+pelagic_pH <- pelagic_org %>%
+  filter(analyte == 'pH')
+
+nrow(pelagic_pH)
+head(pelagic_pH)
+
+pelagic_pH %>%
+  ggplot(aes(x = sample_date, y = result)) +
+  geom_line() +
+  geom_smooth() +
+  labs(title = 'pH over time')
+#not really sure how to cap it at 2010 since I don't know how to filter dates
 ```
 
