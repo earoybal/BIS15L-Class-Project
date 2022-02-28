@@ -2,7 +2,9 @@
 title: "exploration"
 author: "Evan Roybal"
 date: "2/10/2022"
-output: html_document
+output: 
+  html_document: 
+    keep_md: yes
 ---
 
 ```{r setup, include=FALSE}
@@ -16,8 +18,15 @@ library(tidyverse)
 library(naniar)
 library(janitor)
 library(skimr)
+library(shiny)
+library(shinydashboard)
+library(lubridate)
+library(ggmap)
 ```
 
+```{r}
+getwd ()
+```
 
 
 loading dataset 
@@ -140,6 +149,9 @@ taxda %>%
 Potential heat map for organism abundance?
 Could also focus on Hyalella azteca
 
+Sounds Good
+
+
 ```{r}
 pelagic_pH <- pelagic_org %>%
   filter(analyte == 'pH')
@@ -148,6 +160,7 @@ nrow(pelagic_pH)
 head(pelagic_pH)
 
 pelagic_pH %>%
+  filter((sample_date) <= 2020) %>%
   ggplot(aes(x = sample_date, y = result)) +
   geom_line() +
   geom_smooth() +
@@ -155,3 +168,102 @@ pelagic_pH %>%
 #not really sure how to cap it at 2010 since I don't know how to filter dates
 ```
 
+```{r}
+typeof(taxda$result)
+```
+
+```{r}
+
+```
+
+
+
+
+Not Working ATM
+```{r}
+ui <- fluidPage(    
+  
+  titlePanel("Log 10 Homerange by Locomotion"), # give the page a title
+  
+  # generate a row with a sidebar
+  sidebarLayout(      
+    
+  # define the sidebar with one input
+  sidebarPanel(
+  selectInput("Analyte", " Select Analyte of Interest:", choices=unique(taxda$analyte)), hr()),
+    
+  # create a spot for the barplot
+  mainPanel(
+  plotOutput("anyPlot"))
+  )
+  )
+
+  # define a server for the Shiny app
+  server <- function(input, output, session) {
+  
+  # fill in the spot we created for a plot
+  output$anyPlot <- renderPlot({
+    
+    taxda %>% 
+    filter(analyte == "pH") %>%
+    ggplot(aes_string(x=sample_date, y = result)) + 
+    geom_line()
+  })
+  }
+
+#shinyApp(ui, server)
+
+```
+
+## Other Analysis
+
+```{r}
+taxda_sep <- taxda %>%
+    separate(sample_date, into = c("year", "month", "date"), sep="-") 
+pelagic_org2 <- taxda_sep %>%
+  filter(grepl('Pelagic', project))
+pelagic_pH2 <- pelagic_org2 %>%
+  filter(analyte == 'pH')
+
+
+pelagic_pH %>%
+  filter(year <= 2010) %>%
+  ggplot(aes(x = year, y = result)) +
+  geom_boxplot() +
+  geom_smooth() +
+  labs(title = 'pH over time')
+```
+
+
+
+
+```{r}
+pelagic_pH %>%
+  group_by(year) %>%
+  summarise(mean_res = mean(result)) %>%
+  ggplot(aes(x = year, y = mean_res, group =1)) +
+  geom_line() +
+  geom_smooth() +
+  labs(title = 'pH over time')
+```
+
+```{r}
+taxda_sep %>%
+  group_by(organism_name) %>%
+  filter(result != "NA") %>%
+  summarise(mean_result = mean(result)) 
+  
+```
+
+```{r}
+taxda_sep %>%
+  filter(result != "NA") %>%
+   ggplot(aes(x=organism_name, y=result, fill=collection_method_name)) + 
+  geom_boxplot()+ 
+  facet_wrap(~collection_method_name, ncol=)+
+  theme(axis.text.x = element_text(angle = 60, hjust = 1))+
+  scale_y_log10()+
+  coord_flip()
+```
+
+Test
