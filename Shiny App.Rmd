@@ -1,0 +1,129 @@
+---
+title: "shiny"
+author: "Colin Lauffer"
+date: "3/3/2022"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Shiny App
+
+```{r}
+taxda <- readr::read_csv("toxicity_davis.csv")
+glimpse(taxda)
+library(ggVennDiagram)
+library(RColorBrewer)
+#install.packages("ggworldcloud")
+library(ggwordcloud)
+```
+
+```{r}
+library(tidyverse)
+library(naniar)
+library(janitor)
+library(skimr)
+library(shiny)
+library(shinydashboard)
+library(lubridate)
+library(ggmap)
+```
+
+```{r}
+taxda_sep %>%
+  count(analyte)
+```
+
+```{r}
+taxda_sep %>%
+  count(organism_name)
+```
+
+```{r}
+
+taxda_sepyr <- taxda_sep %>% 
+  filter(result != ) %>%
+  mutate(year_num = as.numeric(year))
+
+
+```
+
+
+```{r}
+ui <- 
+  dashboardPage(
+  dashboardHeader(title = "Analyte"),
+  dashboardSidebar(disable =  T),
+  dashboardBody(
+  fluidRow(
+  box(title = "Plot Options", width = 3,
+
+
+  selectInput("x", "Select Analyte", choices = c("Survival", "Oxygen, Dissolved, Total", "pH"),
+              selected = "pH"),
+  selectInput("y", "Select Orgnaism", choices = c("Ceriodaphnia dubia", "Eurytemora affinis", "Hyalella azteca", "Hypomesus transpacificus", "Lemna minor", "Morone saxatilis	", "Oncorhynchus mykiss", "Pimephales promelas", "Selenastrum capricornutum"),
+              selected = "Lemna minor"),
+    ),
+    box(title = "Plot of Analyte", width = 9,
+        plotOutput("plot", width = "600px", height = "500px"))
+    
+    )
+  
+  
+    )
+)
+
+server <- function(input, output,session) {
+  
+  session$onSessionEnded(stopApp)
+  
+  output$plot <- renderPlot({
+    
+    taxda_sepyr %>%
+    filter(analyte == input$x) %>%
+    filter(organism_name == input$y) %>%
+    ggplot(aes(x = year, y= result, fill = organism_name)) + 
+    geom_col() + 
+    labs(x = "Ethnicity", y= "Density") +
+    theme_classic(base_size = 18)
+  })
+  
+}
+
+shinyApp(ui, server)
+```
+
+
+```{r}
+ taxda_c <- taxda_sepyr %>% 
+  count(organism_name)
+taxda_c
+```
+
+```{r}
+taxda_c %>% 
+ggplot(aes(
+  label = organism_name, 
+  size = n,
+  color = organism_name
+  )) +
+  geom_text_wordcloud() +
+  scale_size_area(max_size = 18) +
+  theme_minimal()
+```
+
+```{r}
+taxda_sepyr %>%
+  count(project)
+```
+
+
+```{r}
+taxda_sepyr %>%
+  select(organism_name, year, result) %>%
+  pivot_wider(names_from = year,
+              values_from = result)  
+```
+
