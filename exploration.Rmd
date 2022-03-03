@@ -204,14 +204,14 @@ ui <- fluidPage(
   # fill in the spot we created for a plot
   output$anyPlot <- renderPlot({
     
-    taxda %>% 
-    filter(analyte == "pH") %>%
-    ggplot(aes_string(x=sample_date, y = result)) + 
+    taxda_sep %>% 
+    filter(analyte == input$analyte) %>%
+    ggplot(aes_string(x=year, y = result)) + 
     geom_line()
   })
   }
 
-#shinyApp(ui, server)
+shinyApp(ui, server)
 
 ```
 
