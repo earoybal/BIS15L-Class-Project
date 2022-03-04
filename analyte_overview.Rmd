@@ -10,6 +10,59 @@ knitr::opts_chunk$set(echo = TRUE)
 ```
 
 ```{r}
+library(tidyverse)
+library(naniar)
+library(janitor)
+library(skimr)
+library(shiny)
+library(shinydashboard)
+library(lubridate)
+library(ggmap)
+```
 
+
+```{r}
+taxda <- read.csv('toxicity_davis.csv')
+miss_var_summary(taxda)
+
+taxda_noNA <- taxda %>%
+  select(-c(group_samples, occupation_method, starting_bank, distance_from_bank, unit_distance_from_bank, stream_width, unit_stream_width, station_water_depth, unit_station_water_depth, hydro_mod, hydro_mod_loc, channel_width, upstream_length, downstream_length, total_reach))
+
+miss_var_summary(taxda_noNA)
+
+taxda_sep <- taxda %>%
+  separate(organism_name, into = c('genus', 'species'), sep = ' ')
+
+taxda_sep
+
+taxda_sep %>%
+  ggplot()
+```
+
+```{r}
+taxda_survival <- taxda_sep %>%
+  filter(analyte == 'Survival')
+
+taxda_oxygen <- taxda_sep %>%
+  filter(analyte == 'Oxygen, Dissolved, Total')
+
+taxda_pH <- taxda_sep %>%
+  filter(analyte == 'pH')
+```
+
+```{r}
+taxda_survival %>%
+  filter(species == 'promelas') %>%
+  ggplot(aes(x = sample_date, y = result)) +
+  geom_point()
+
+
+ 
+```
+
+```{r}
+taxda_sep %>%
+  filter(analyte == 'pH',
+         station_name == 'Quality Assurance Sample-LABQA')
 ```
 
