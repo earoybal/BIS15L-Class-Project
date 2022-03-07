@@ -11,5 +11,37 @@ knitr::opts_chunk$set(echo = TRUE)
 
 ## Sac River
 
+```{r}
+library(tidyverse)
+```
 
+
+```{r}
+taxda <- readr::read_csv("toxicity_davis.csv")
+taxda_sep <- taxda %>%
+    separate(sample_date, into = c("year", "month", "date"), sep="-") 
+taxda_sepyr <- taxda_sep %>% 
+  mutate(year_num = as.numeric(year))
+taxda_sac <- taxda_sepyr %>%
+  filter(grepl('Sac', project)) 
+
+```
+
+```{r}
+taxda_sac %>%
+  count(collection_depth)
+```
+
+
+```{r}
+taxda_sac %>%
+  ggplot(aes(x=organism_name, y= )) +
+  geom_boxplot()
+```
+
+```{r}
+taxda_sac %>%
+  group_by(year, result) %>% 
+  summarise(result_me = mean(result)) 
+```
 
