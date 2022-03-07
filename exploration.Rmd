@@ -5,6 +5,8 @@ date: "2/10/2022"
 output: 
   html_document: 
     keep_md: yes
+editor_options: 
+  chunk_output_type: console
 ---
 
 ```{r setup, include=FALSE}
@@ -24,12 +26,8 @@ library(lubridate)
 library(ggmap)
 ```
 
-```{r}
-getwd ()
-```
-
-
-loading dataset 
+### loading original dataset
+This code has been commented out as the original dataset is over a gigabyte in size and so we used this code chunk to cut it down to a more manageable size for both R and our computers.
 ```{r}
 #toxicity <- read.csv('toxicitydata_2022-01-07.csv')
 
@@ -42,6 +40,7 @@ loading dataset
 #  filter(near(latitude, 38.73, tol = 1), near(longitude, #-121.81, tol = 1))
 #toxicity_short
 
+#Cutting down dataset to only include data collected by the Aquatic toxicology lab at UC Davis
 #toxicity_davis <- toxicity %>%
 #  filter(str_detect(sample_agency, "University of California Davis-Aquatic Toxicology Lab"))
 
@@ -49,13 +48,13 @@ loading dataset
 
 #colnames(toxicity_davis)
 
-#head
-
+#Removal of columns that are useless for our analyses or have unusable data
 #toxicity_davis <- toxicity_davis %>%
 #  select(-c(station_code, location_code, sample_type_code, lab_sample_id, batch_verification_code, compliance_code, sample_comments, collection_comments, tox_test_comments, time_point_comments, tox_result_comments, tox_batch_comments, event_code, protocol_code, lab_submission_code, location_detail_wq_comments, sample_id))
          
 #table(toxicity_davis$sample_agency)
 
+#This is where the shorter 
 #write.csv(toxicity_davis, file = "toxicity_davis.csv")
 
 ```
@@ -63,36 +62,33 @@ loading dataset
 ```{r}
 taxda <- readr::read_csv("toxicity_davis.csv")
 glimpse(taxda)
-```
 
-```{r}
-taxda %>%
-  filter(latitude != -88) %>%
-  filter(longitude != -88) %>%
-  select(latitude, longitude) %>%
-  summary()
 ```
 
 ```{r}
 taxda_map <- taxda %>%
   filter(latitude != -88) %>%
   filter(longitude != -88) 
+#-88 is commonly used to represent NAs in this dataset and so we removed this from latitude and longitude to not mess with any maps created
 ```
 
-
+creation of bounding box for maps
 ```{r}
 lat <- c(37.27 ,40.96)
 long <- c(-122.5  , -120.4 )
 bbox <- make_bbox(long, lat, f = 0.05)
 ```
 
+retrieval of a terrain map
 ```{r}
 map1 <- get_map(bbox, maptype = "terrain", source = "stamen")
 ggmap(map1)
 ```
+
+creating a basic map of the 
 ```{r}
 ggmap(map1) + 
-  geom_point(data = taxda, aes(longitude, latitude)) +
+  geom_point(data = taxda, aes(x = longitude,y = latitude, size = result, color = result)) +
   labs(x = "Longitude", y = "Latitude", title = "Locations")
 ```
 
@@ -108,7 +104,7 @@ ca_cnty_comp <- cnty_comp %>%
 ggplot() +
   geom_sf(data = ca_comp, size = 0.125)+
   geom_sf(data = ca_cnty_comp, size = 0.125)+
-  geom_point(data = taxda_map, aes(longitude, latitude))
+  geom_point(data = taxda_map, aes(longitude, latitude,size = result, color = organism_name), alpha = .3)
 ```
 
 
@@ -160,12 +156,12 @@ nrow(pelagic_pH)
 head(pelagic_pH)
 
 pelagic_pH %>%
-  filter((sample_date) <= 2020) %>%
+  filter(sample_date <= '2010-12-31') %>%
   ggplot(aes(x = sample_date, y = result)) +
-  geom_line() +
-  geom_smooth() +
+  geom_point() +
+  geom_smooth(method = lm) +
   labs(title = 'pH over time')
-#not really sure how to cap it at 2010 since I don't know how to filter dates
+
 ```
 
 ```{r}

@@ -1,0 +1,122 @@
+---
+title: "pelagic_zone"
+author: "Evan Roybal"
+date: '2022-03-07'
+output: html_document
+keep_md: yes
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(tidyverse)
+library(naniar)
+library(janitor)
+library(skimr)
+library(shiny)
+library(shinydashboard)
+library(lubridate)
+#library(ggmap)
+```
+
+```{r}
+taxda <- readr::read_csv("toxicity_davis.csv")
+
+taxda_noNA <- taxda %>%
+  select(-c(group_samples, occupation_method, starting_bank, distance_from_bank, unit_distance_from_bank, stream_width, unit_stream_width, station_water_depth, unit_station_water_depth, hydro_mod, hydro_mod_loc, channel_width, upstream_length, downstream_length, total_reach))
+
+taxda_sep <- taxda %>%
+  separate(organism_name, into = c('genus', 'species'), sep = ' ')
+
+pelagic_org <- taxda_sep %>%
+  filter(grepl('Pelagic', project))
+
+unique(pelagic_org$analyte)
+```
+
+Separating out the different analytes into different dataframes
+```{r}
+pelagic_org %>%
+  filter(analyte == '')
+
+#electrical conductivty
+taxda_econduct <- pelagic_org %>%
+  filter(analyte == 'ElectricalConductivity, Not Recorded')
+
+#alkalinity as CaCO3
+taxda_alkalinity <- pelagic_org %>%
+  filter(analyte == 'Alkalinity as CaCO3, Not Recorded')
+
+#no data for survival so excluded, same goes for weight
+#taxda_survival <- pelagic_org %>%
+#  filter(analyte == 'Survival')
+
+pelagic_specific_conduct <- pelagic_org %>%
+  filter(analyte == 'SpecificConductivity, Not Recorded')
+
+pelagic_reproduction <- pelagic_org %>%
+  filter(analyte == 'Reproduction')
+
+taxda_oxygen <- pelagic_org %>%
+  filter(analyte == 'Oxygen, Dissolved, Not Recorded')
+
+taxda_pH <- pelagic_org %>%
+  filter(analyte == 'pH')
+```
+
+```{r}
+miss_var_summary(taxda_survival)
+#no survival data for pelagic zone so excluding it from analysis
+miss_var_summary(taxda_oxygen)
+
+miss_var_summary(taxda_pH)
+
+taxda_oxygen$result <- as.numeric(taxda_oxygen$result)
+view(taxda_pH$result)
+```
+
+I have no idea why this isn't working 
+
+Creating a shiny app to display the pH, dissolved oxygen, Hardness, Temp, and ammonia as NH3
+```{r}
+ui <- dashboardPage(
+  dashboardHeader(title = 'San Joaquin River Delta Data'),
+  dashboardSidebar(disable = T),
+  dashboardBody(
+    selectInput('y', 'Select Analyte', choices = c('pH', 'Oxygen, Dissolved, Not Recorded', 'Hardness as CaCO3, Not Recorded', 'Temperature', 'Ammonia as NH3, Unionized, Not Recorded'),
+                selected = 'pH'),
+    plotOutput('plot', width = '500px', height = '400px'))
+)
+
+server <- function(input, output, session) {
+  output$plot <- renderPlot({
+    pelagic_org %>%
+      filter(analyte == input$y, sample_date <= '2010-12-31') %>%
+      ggplot(aes_string(x = 'sample_date', y = 'result')) +
+      geom_point() +
+      geom_smooth() +
+      theme_light() +
+      labs(title = 'Analyte Change Over Time',
+           x = 'Date',
+           y = if (input$y == 'pH') {
+             'pH'
+           } else if (input$y == 'Temperature') {
+             'Temperature (Deg C)'
+           } else if (input$y == 'Oxygen, Dissolved, Not Recorded') {
+             'Dissolve Oxygen (mg/L)'
+           } else if (input$y == 'Hardness as CaCO3, Not Recorded') {
+             'Water Hardness Measured by CaCO3 Concentrations (mg/L)'
+           } else if (input$y == 'Ammonia as NH3, Unionized, Not Recorded') {
+             'Amount of NH3 in Water (mg/L)'
+           }
+      )
+   # session$onSessionEnded(stopApp)
+   #I don't know why but commenting this out seems to make everything work 
+  })
+}
+
+shinyApp(ui, server)
+```
+
