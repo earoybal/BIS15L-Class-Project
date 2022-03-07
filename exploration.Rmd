@@ -24,6 +24,7 @@ library(shiny)
 library(shinydashboard)
 library(lubridate)
 library(ggmap)
+library(naniar)
 ```
 
 ### loading original dataset
@@ -64,6 +65,11 @@ taxda <- readr::read_csv("toxicity_davis.csv")
 glimpse(taxda)
 
 ```
+
+```{r}
+naniar::miss_var_summary(taxda)
+```
+
 
 ```{r}
 taxda_map <- taxda %>%
