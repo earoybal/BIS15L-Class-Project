@@ -86,7 +86,56 @@ server <- function(input, output,session) {
     filter(organism_name == input$y) %>%
     ggplot(aes(x = year, y= result, fill = organism_name)) + 
     geom_col() + 
-    labs(x = "Ethnicity", y= "Density") +
+    labs(x = "Year", y= "Result") +
+    theme_classic(base_size = 18)
+  })
+  
+}
+
+shinyApp(ui, server)
+```
+
+
+```{r}
+
+```
+
+
+```{r}
+ui <- 
+  dashboardPage(
+  dashboardHeader(title = "Analyte"),
+  dashboardSidebar(disable =  T),
+  dashboardBody(
+  fluidRow(
+  box(title = "Plot Options", width = 3,
+
+
+  selectInput("x", "Select Analyte", choices = c("Survival", "Oxygen, Dissolved, Total", "pH"),
+              selected = "pH"),
+
+    ),
+    box(title = "Plot of Analyte", width = 9,
+        plotOutput("plot", width = "600px", height = "500px"))
+    
+    )
+  
+  
+    )
+)
+
+server <- function(input, output,session) {
+  
+  session$onSessionEnded(stopApp)
+  
+  output$plot <- renderPlot({
+    
+    tax_c_sac %>%
+    filter(analyte == input$x) %>%
+    filter(station_name == "American River at Discovery Park (SVWQC)") %>%
+    ggplot(aes(x = year, y = result, fill = organism_name)) + 
+    geom_col() + 
+    labs(x = "Year", y= "Result") +
     theme_classic(base_size = 18)
   })
   
@@ -121,9 +170,25 @@ taxda_sepyr %>%
 
 
 ```{r}
-taxda_sepyr %>%
-  select(organism_name, year, result) %>%
-  pivot_wider(names_from = year,
-              values_from = result)  
+tax_c_sac <- taxda_sepyr %>%
+  filter(grepl('Sac', project)) %>%
+  filter(station_name == "Mud Creek above Big Chico Creek") %>%
+  count(analyte)
+ 
+tax_c_sac
 ```
+
+```{r}
+tax_c_sac %>%
+  ggplot(aes(year, organism_name, fill= result)) + 
+    geom_tile() +
+    scale_fill_gradient(low="yellow", high="red")
+```
+
+```{r}
+taxda_sep %>%
+  select(year, organism_name)
+  group_by(organism_name)
+```
+
 

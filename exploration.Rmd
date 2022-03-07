@@ -266,4 +266,12 @@ taxda_sep %>%
   coord_flip()
 ```
 
-Test
+```{r}
+taxda_sepyr %>%
+  ggplot(aes(year, organism_name, fill= result)) + 
+  geom_tile() +
+  scale_fill_gradient(low="yellow", high="red") +
+  theme(axis.text.x = element_text(angle = 60, hjust = 1))
+```
+
+
