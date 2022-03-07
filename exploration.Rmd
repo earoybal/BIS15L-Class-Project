@@ -104,7 +104,9 @@ ca_cnty_comp <- cnty_comp %>%
 ggplot() +
   geom_sf(data = ca_comp, size = 0.125)+
   geom_sf(data = ca_cnty_comp, size = 0.125)+
-  geom_point(data = taxda_map, aes(longitude, latitude,size = result, color = organism_name), alpha = .3)
+  geom_point(data = taxda_map, aes(longitude, latitude,size = result, color = organism_name), alpha = .3)+
+  labs(title = "Spatial Distribution of Our Data")+
+  theme(axis.text.x = element_text(angle = 60, hjust = 1))+
 ```
 
 

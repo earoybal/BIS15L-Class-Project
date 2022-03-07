@@ -44,7 +44,6 @@ taxda_sep %>%
 ```{r}
 
 taxda_sepyr <- taxda_sep %>% 
-  filter(result != ) %>%
   mutate(year_num = as.numeric(year))
 
 
