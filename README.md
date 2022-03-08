@@ -6,9 +6,10 @@ This repository contains all of the code pertaining to the class project for BIS
 
 *This was completed by Evan Roybal And Colin Lauffer*
 
-```
+
 **Table of Contents**
 
+```
 Sac Watershed: Contains our Analyses regarding the Sacraemento Project
 Shiny App: Contains the Shiny app for Sacramento and the heat map.
 analyte_overview: Temporary File for further exploration.
