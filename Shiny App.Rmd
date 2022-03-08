@@ -30,23 +30,25 @@ library(shinydashboard)
 library(lubridate)
 library(ggmap)
 ```
-
+### Analyte Count
 ```{r}
 taxda_sep %>%
   count(analyte)
 ```
-
+### Seperate Orgnaims
 ```{r}
 taxda_sep <- taxda %>%
     separate(sample_date, into = c("year", "month", "date"), sep="-") 
 ```
 
-
+### Organism Count
 ```{r}
 taxda_sep %>%
   count(organism_name)
 ```
 
+
+### Count
 ```{r}
 
 taxda_sepyr <- taxda_sep %>% 
@@ -56,10 +58,11 @@ taxda_sac <- taxda_sepyr %>%
   filter(grepl('Sac', project))
 taxda_sac %>%
   count(year)
+
 ```
 
 
-
+### Shiny
 ```{r}
 ui <- 
   dashboardPage(
@@ -109,24 +112,7 @@ shinyApp(ui, server)
 
 
 
-```{r}
-taxda_sac %>%
-  count(years) %>%
-  summarise(n()) 
-  
-```
 
-```{r}
-taxda_c %>% 
-ggplot(aes(
-  label = organism_name, 
-  size = n,
-  color = organism_name
-  )) +
-  geom_text_wordcloud() +
-  scale_size_area(max_size = 18) +
-  theme_minimal()
-```
 
 ```{r}
 taxda_sepyr %>%
