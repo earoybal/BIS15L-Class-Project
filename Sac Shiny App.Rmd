@@ -56,8 +56,8 @@ taxda_sepyr <- taxda_sep %>%
   mutate(year_num = as.numeric(year))
 taxda_sac <- taxda_sepyr %>%
   filter(grepl('Sac', project))
-taxda_sac %>%
-  count(year)
+  
+
 
 ```
 
