@@ -13,7 +13,6 @@ editor_options:
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-
 Loading Packages
 ```{r}
 library(tidyverse)
@@ -25,7 +24,13 @@ library(shinydashboard)
 library(lubridate)
 library(ggmap)
 library(naniar)
+library(ggwordcloud)
 ```
+
+```{r}
+options(scipen = -999)
+```
+
 
 ### loading original dataset
 This code has been commented out as the original dataset is over a gigabyte in size and so we used this code chunk to cut it down to a more manageable size for both R and our computers.
@@ -112,7 +117,7 @@ ggplot() +
   geom_sf(data = ca_cnty_comp, size = 0.125)+
   geom_point(data = taxda_map, aes(longitude, latitude,size = result, color = organism_name), alpha = .3)+
   labs(title = "Spatial Distribution of Our Data")+
-  theme(axis.text.x = element_text(angle = 60, hjust = 1))+
+  theme(axis.text.x = element_text(angle = 60, hjust = 1))
 ```
 
 
@@ -278,4 +283,16 @@ taxda_sepyr %>%
   theme(axis.text.x = element_text(angle = 60, hjust = 1))
 ```
 
+creating a wordcloud for all of the projects
+```{r}
+count_taxda <- tabyl(taxda$project)
+count_taxda <- count_taxda %>%
+  rename('project' = 'taxda$project')
+count_taxda
+
+count_taxda %>%
+ggplot(aes(label = project, color = project, size = n)) +
+  geom_text_wordcloud() +
+  theme_minimal()
+```
 

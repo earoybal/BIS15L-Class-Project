@@ -18,7 +18,7 @@ library(skimr)
 library(shiny)
 library(shinydashboard)
 library(lubridate)
-#library(ggmap)
+library(ggmap)
 ```
 
 ```{r}
@@ -38,15 +38,12 @@ unique(pelagic_org$analyte)
 
 Separating out the different analytes into different dataframes
 ```{r}
-pelagic_org %>%
-  filter(analyte == '')
-
 #electrical conductivty
-taxda_econduct <- pelagic_org %>%
+pelagic_econduct <- pelagic_org %>%
   filter(analyte == 'ElectricalConductivity, Not Recorded')
 
 #alkalinity as CaCO3
-taxda_alkalinity <- pelagic_org %>%
+pelagic_alkalinity <- pelagic_org %>%
   filter(analyte == 'Alkalinity as CaCO3, Not Recorded')
 
 #no data for survival so excluded, same goes for weight
@@ -59,11 +56,14 @@ pelagic_specific_conduct <- pelagic_org %>%
 pelagic_reproduction <- pelagic_org %>%
   filter(analyte == 'Reproduction')
 
-taxda_oxygen <- pelagic_org %>%
+pelagic_oxygen <- pelagic_org %>%
   filter(analyte == 'Oxygen, Dissolved, Not Recorded')
 
-taxda_pH <- pelagic_org %>%
+pelagic_pH <- pelagic_org %>%
   filter(analyte == 'pH')
+
+pelagic_temp <- pelagic_org %>%
+  filter(analyte == 'Temperature')
 ```
 
 ```{r}
@@ -73,30 +73,38 @@ miss_var_summary(taxda_oxygen)
 
 miss_var_summary(taxda_pH)
 
-taxda_oxygen$result <- as.numeric(taxda_oxygen$result)
-view(taxda_pH$result)
+pelagic_oxygen$result <- as.numeric(taxda_oxygen$result)
 ```
 
-I have no idea why this isn't working 
+Making pelagic_org into a .csv file for use in the shiny app
+```{r}
+write.csv(pelagic_org,file = 'pelagic_org.csv')
+
+```
+
 
 Creating a shiny app to display the pH, dissolved oxygen, Hardness, Temp, and ammonia as NH3
 ```{r}
 ui <- dashboardPage(
-  dashboardHeader(title = 'San Joaquin River Delta Data'),
+  dashboardHeader(title = 'San Joaquin Delta'),
   dashboardSidebar(disable = T),
   dashboardBody(
+    fluidRow(
+      box(title = 'Plot Options', width = 3,
     selectInput('y', 'Select Analyte', choices = c('pH', 'Oxygen, Dissolved, Not Recorded', 'Hardness as CaCO3, Not Recorded', 'Temperature', 'Ammonia as NH3, Unionized, Not Recorded'),
-                selected = 'pH'),
-    plotOutput('plot', width = '500px', height = '400px'))
-)
+                selected = 'pH')),
+    box(title = 'Plot of Analyte', width = 7,
+    plotOutput('plot', width = '400px', height = '400px')))
+))
 
 server <- function(input, output, session) {
   output$plot <- renderPlot({
     pelagic_org %>%
       filter(analyte == input$y, sample_date <= '2010-12-31') %>%
       ggplot(aes_string(x = 'sample_date', y = 'result')) +
-      geom_point() +
-      geom_smooth() +
+      geom_point(alpha = .5) +
+      geom_smooth(method = lm, color = 'yellow', alpha = .5) +
+      geom_smooth(color = 'red', alpha = .5) +
       theme_light() +
       labs(title = 'Analyte Change Over Time',
            x = 'Date',
@@ -113,10 +121,34 @@ server <- function(input, output, session) {
            }
       )
    # session$onSessionEnded(stopApp)
-   #I don't know why but commenting this out seems to make everything work 
+   #I don't know why but commenting this out seems to make it work 
   })
 }
 
 shinyApp(ui, server)
+```
+
+map of data to show where it is located
+```{r}
+#albersusa didn't work due to errors when trying to filter the map
+pelagic_org %>%
+  summarise(min_lat = min(latitude), max_lat = max(latitude), min_long = min(longitude), max_long = max(longitude))
+
+
+lat <- c(37.27 ,40.96)
+long <- c(-122.5  , -120.4 )
+bbox <- make_bbox(long, lat, f = 0.05)
+
+map1 <- get_map(bbox, maptype = "terrain", source = "stamen")
+
+ggmap(map1) +
+  geom_point(data = pelagic_org, aes(longitude, latitude)) +
+  labs(x = 'Longitude', y = 'Latitude', title = 'Location of Data Samples')
+
+```
+
+box and violin plot of pH, dissolved oxygen, water hardness, temp, and ammonia concentration
+```{r}
+
 ```
 
