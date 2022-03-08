@@ -45,3 +45,21 @@ taxda_sac %>%
   summarise(result_me = mean(result)) 
 ```
 
+```{r}
+taxda_sac %>%
+  filter(result < 100) %>%
+  ggplot(aes(x=analyte,y = result, fill = organism_name))+
+  geom_violin(alpha = .3, na.rm = TRUE) +
+  geom_boxplot(alpha = .4)+
+  theme_classic()+
+  facet_wrap(~organism_name)+
+  scale_y_log10()+
+  theme(axis.text.x = element_text(angle = 60, hjust = 1))+
+  labs(title = "Result by Analyte and Organism",
+       x = NULL,
+       y = "Result",
+       fill = "Organism Name")
+  
+
+```
+

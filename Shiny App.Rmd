@@ -37,6 +37,12 @@ taxda_sep %>%
 ```
 
 ```{r}
+taxda_sep <- taxda %>%
+    separate(sample_date, into = c("year", "month", "date"), sep="-") 
+```
+
+
+```{r}
 taxda_sep %>%
   count(organism_name)
 ```
@@ -44,10 +50,14 @@ taxda_sep %>%
 ```{r}
 
 taxda_sepyr <- taxda_sep %>% 
+  filter(result != -88) %>%
   mutate(year_num = as.numeric(year))
-
-
+taxda_sac <- taxda_sepyr %>%
+  filter(grepl('Sac', project))
+taxda_sac %>%
+  count(year)
 ```
+
 
 
 ```{r}
@@ -57,16 +67,16 @@ ui <-
   dashboardSidebar(disable =  T),
   dashboardBody(
   fluidRow(
-  box(title = "Plot Options", width = 3,
+  box(title = "Plot Options", width = 2,
 
 
-  selectInput("x", "Select Analyte", choices = c("Survival", "Oxygen, Dissolved, Total", "pH"),
+  radioButtons("x", "Select Analyte", choices = c("Oxygen, Dissolved, Not Recorded", "pH"),
               selected = "pH"),
-  selectInput("y", "Select Orgnaism", choices = c("Ceriodaphnia dubia", "Eurytemora affinis", "Hyalella azteca", "Hypomesus transpacificus", "Lemna minor", "Morone saxatilis	", "Oncorhynchus mykiss", "Pimephales promelas", "Selenastrum capricornutum"),
-              selected = "Lemna minor"),
+  selectInput("y", "Select Orgnaism", choices = c("Ceriodaphnia dubia", "Pimephales promelas", "Selenastrum capricornutum"),
+              selected = "Pimephales promelas"),
     ),
-    box(title = "Plot of Analyte", width = 9,
-        plotOutput("plot", width = "600px", height = "500px"))
+    box(title = "Plot of Analyte", width = 10,
+        plotOutput("plot", width = "700px", height = "800px"))
     
     )
   
@@ -80,13 +90,15 @@ server <- function(input, output,session) {
   
   output$plot <- renderPlot({
     
-    taxda_sepyr %>%
+    taxda_sac %>%
     filter(analyte == input$x) %>%
     filter(organism_name == input$y) %>%
-    ggplot(aes(x = year, y= result, fill = organism_name)) + 
+    ggplot(aes(x = year, y = result, fill = station_name)) + 
     geom_col() + 
     labs(x = "Year", y= "Result") +
-    theme_classic(base_size = 18)
+    guides(shape = guide_legend(override.aes = list(size = 0.5)))+
+    theme_classic()
+
   })
   
 }
@@ -95,59 +107,13 @@ shinyApp(ui, server)
 ```
 
 
-```{r}
-
-```
 
 
 ```{r}
-ui <- 
-  dashboardPage(
-  dashboardHeader(title = "Analyte"),
-  dashboardSidebar(disable =  T),
-  dashboardBody(
-  fluidRow(
-  box(title = "Plot Options", width = 3,
-
-
-  selectInput("x", "Select Analyte", choices = c("Survival", "Oxygen, Dissolved, Total", "pH"),
-              selected = "pH"),
-
-    ),
-    box(title = "Plot of Analyte", width = 9,
-        plotOutput("plot", width = "600px", height = "500px"))
-    
-    )
+taxda_sac %>%
+  count(years) %>%
+  summarise(n()) 
   
-  
-    )
-)
-
-server <- function(input, output,session) {
-  
-  session$onSessionEnded(stopApp)
-  
-  output$plot <- renderPlot({
-    
-    tax_c_sac %>%
-    filter(analyte == input$x) %>%
-    filter(station_name == "American River at Discovery Park (SVWQC)") %>%
-    ggplot(aes(x = year, y = result, fill = organism_name)) + 
-    geom_col() + 
-    labs(x = "Year", y= "Result") +
-    theme_classic(base_size = 18)
-  })
-  
-}
-
-shinyApp(ui, server)
-```
-
-
-```{r}
- taxda_c <- taxda_sepyr %>% 
-  count(organism_name)
-taxda_c
 ```
 
 ```{r}
