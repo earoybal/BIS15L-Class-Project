@@ -12,7 +12,7 @@ knitr::opts_chunk$set(echo = TRUE)
 ## Shiny App
 
 ```{r}
-taxda <- readr::read_csv("toxicity_davis.csv")
+taxda <- readr::read_csv("data/toxicity_davis.csv")
 glimpse(taxda)
 library(ggVennDiagram)
 library(RColorBrewer)
@@ -141,5 +141,6 @@ taxda_sep %>%
   select(year, organism_name)
   group_by(organism_name)
 ```
+
 
 
