@@ -21,8 +21,10 @@ library(lubridate)
 library(ggmap)
 ```
 
+
+### Loading Data
 ```{r}
-taxda <- readr::read_csv("toxicity_davis.csv")
+taxda <- readr::read_csv("data/toxicity_davis.csv")
 
 taxda_noNA <- taxda %>%
   select(-c(group_samples, occupation_method, starting_bank, distance_from_bank, unit_distance_from_bank, stream_width, unit_stream_width, station_water_depth, unit_station_water_depth, hydro_mod, hydro_mod_loc, channel_width, upstream_length, downstream_length, total_reach))
@@ -36,7 +38,7 @@ pelagic_org <- taxda_sep %>%
 unique(pelagic_org$analyte)
 ```
 
-Separating out the different analytes into different dataframes
+### Separating out the different analytes into different dataframes
 ```{r}
 #electrical conductivty
 pelagic_econduct <- pelagic_org %>%
@@ -66,6 +68,9 @@ pelagic_temp <- pelagic_org %>%
   filter(analyte == 'Temperature')
 ```
 
+
+
+
 ```{r}
 miss_var_summary(taxda_survival)
 #no survival data for pelagic zone so excluding it from analysis
@@ -76,14 +81,14 @@ miss_var_summary(taxda_pH)
 pelagic_oxygen$result <- as.numeric(taxda_oxygen$result)
 ```
 
-Making pelagic_org into a .csv file for use in the shiny app
+### Making pelagic_org into a .csv file for use in the shiny app
 ```{r}
 write.csv(pelagic_org,file = 'pelagic_org.csv')
 
 ```
 
 
-Creating a shiny app to display the pH, dissolved oxygen, Hardness, Temp, and ammonia as NH3
+### Creating a shiny app to display the pH, dissolved oxygen, Hardness, Temp, and ammonia as NH3
 ```{r}
 ui <- dashboardPage(
   dashboardHeader(title = 'San Joaquin Delta'),
@@ -128,7 +133,7 @@ server <- function(input, output, session) {
 shinyApp(ui, server)
 ```
 
-map of data to show where it is located
+### map of data to show where it is located
 ```{r}
 #albersusa didn't work due to errors when trying to filter the map
 pelagic_org %>%
@@ -147,7 +152,7 @@ ggmap(map1) +
 
 ```
 
-box and violin plot of pH, dissolved oxygen, water hardness, temp, and ammonia concentration
+### box and violin plot of pH, dissolved oxygen, water hardness, temp, and ammonia concentration
 ```{r}
 
 ```
