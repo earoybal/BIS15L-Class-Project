@@ -67,3 +67,18 @@ taxda_sac %>%
 
 
 ### Over time
+```{r}
+taxda_sac %>% 
+  filter(analyte=="pH" | analyte=="Oxygen, Dissolved, Not Recorded") %>% 
+  group_by(year, analyte) %>% 
+  summarise(n=n()) %>% 
+  ggplot(aes(x=year, y=n, group=analyte, color=analyte))+
+  theme_classic()+
+  geom_line()+
+  geom_point(shape=4)+
+  theme(axis.text.x = element_text(angle = 60, hjust = 1))+
+  labs(title = "Number of samples for each Analyte",
+       x = "Year",
+       fill = "Total Number")
+```
+
