@@ -66,7 +66,7 @@ This code has been commented out as the original dataset is over a gigabyte in s
 ```
 
 ```{r}
-taxda <- readr::read_csv("toxicity_davis.csv")
+taxda <- readr::read_csv("data/toxicity_davis.csv")
 glimpse(taxda)
 
 ```
