@@ -37,6 +37,12 @@ taxda_sep %>%
 ```
 
 ```{r}
+taxda_sep <- taxda %>%
+    separate(sample_date, into = c("year", "month", "date"), sep="-") 
+```
+
+
+```{r}
 taxda_sep %>%
   count(organism_name)
 ```
