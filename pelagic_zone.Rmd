@@ -38,41 +38,8 @@ pelagic_org <- taxda_sep %>%
 unique(pelagic_org$analyte)
 ```
 
-### Separating out the different analytes into different dataframes
 ```{r}
-#electrical conductivty
-pelagic_econduct <- pelagic_org %>%
-  filter(analyte == 'ElectricalConductivity, Not Recorded')
-
-#alkalinity as CaCO3
-pelagic_alkalinity <- pelagic_org %>%
-  filter(analyte == 'Alkalinity as CaCO3, Not Recorded')
-
-#no data for survival so excluded, same goes for weight
-#taxda_survival <- pelagic_org %>%
-#  filter(analyte == 'Survival')
-
-pelagic_specific_conduct <- pelagic_org %>%
-  filter(analyte == 'SpecificConductivity, Not Recorded')
-
-pelagic_reproduction <- pelagic_org %>%
-  filter(analyte == 'Reproduction')
-
-pelagic_oxygen <- pelagic_org %>%
-  filter(analyte == 'Oxygen, Dissolved, Not Recorded')
-
-pelagic_pH <- pelagic_org %>%
-  filter(analyte == 'pH')
-
-pelagic_temp <- pelagic_org %>%
-  filter(analyte == 'Temperature')
-```
-
-
-
-
-```{r}
-miss_var_summary(taxda_survival)
+#miss_var_summary(taxda_survival)
 #no survival data for pelagic zone so excluding it from analysis
 miss_var_summary(taxda_oxygen)
 
@@ -83,7 +50,7 @@ pelagic_oxygen$result <- as.numeric(taxda_oxygen$result)
 
 ### Making pelagic_org into a .csv file for use in the shiny app
 ```{r}
-write.csv(pelagic_org,file = 'pelagic_org.csv')
+#write.csv(pelagic_org,file = 'pelagic_org.csv')
 
 ```
 
@@ -136,24 +103,54 @@ shinyApp(ui, server)
 ### map of data to show where it is located
 ```{r}
 #albersusa didn't work due to errors when trying to filter the map
-pelagic_org %>%
-  summarise(min_lat = min(latitude), max_lat = max(latitude), min_long = min(longitude), max_long = max(longitude))
 
-
-lat <- c(37.27 ,40.96)
+#bounds taken from exploration.Rmd
+lat <- c(37.27 ,39)
 long <- c(-122.5  , -120.4 )
 bbox <- make_bbox(long, lat, f = 0.05)
 
 map1 <- get_map(bbox, maptype = "terrain", source = "stamen")
 
 ggmap(map1) +
-  geom_point(data = pelagic_org, aes(longitude, latitude)) +
+  geom_point(data = pelagic_org, aes(longitude, latitude),size = 2, color = 'blue', shape = 'triangle') +
   labs(x = 'Longitude', y = 'Latitude', title = 'Location of Data Samples')
 
 ```
 
+### Separating out the different analytes into different dataframes
+```{r}
+pelagic_oxygen <- pelagic_org %>%
+  filter(analyte == 'Oxygen, Dissolved, Not Recorded')
+
+pelagic_pH <- pelagic_org %>%
+  filter(analyte == 'pH')
+
+pelagic_temp <- pelagic_org %>%
+  filter(analyte == 'Temperature')
+
+pelagic_ammonia <- pelagic_org %>%
+  filter(analyte == 'Ammonia as NH3, Unionized, Not Recorded')
+
+pelagic_hardness <- pelagic_org %>%
+  filter(analyte == 'Hardness as CaCO3, Not Recorded')
+```
+
 ### box and violin plot of pH, dissolved oxygen, water hardness, temp, and ammonia concentration
 ```{r}
+#disabling scipen b/c graph looks weird without it
+options(scipen = 999)
 
+pelagic_org %>%
+  filter(analyte == 'Oxygen, Dissolved, Not Recorded' | analyte == 'pH' | analyte == 'Temperature' | analyte == 'Ammonia as NH3, Unionized, Not Recorded' | analyte == 'Hardness as CaCO3, Not Recorded') %>%
+  ggplot(aes(x = analyte, y = result, fill = analyte)) +
+  geom_boxplot(color= 'gray', alpha = .3) +
+  geom_violin(alpha = .5, scale = 'width') +
+  scale_y_log10() +
+  labs(x = '',
+       y = 'result (log10)',
+       title = 'Range of Analyte Values') +
+  theme_bw() +
+  theme(axis.text.x = element_blank(),
+        axis.ticks.x = element_blank())
 ```
 

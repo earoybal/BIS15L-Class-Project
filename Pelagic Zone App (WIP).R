@@ -2,6 +2,7 @@ library(tidyverse)
 library(shiny)
 library(shinydashboard)
 
+#currently does not display the graph correctly for an unknown reason. The app in the markdown document does display properly.
 #make sure you have pelagic_org.csv inside your working directory
 
 pelagic_org <- read.csv('pelagic_org.csv')
