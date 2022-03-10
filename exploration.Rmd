@@ -76,6 +76,8 @@ naniar::miss_var_summary(taxda)
 ```
 
 
+
+
 ```{r}
 taxda_map <- taxda %>%
   filter(latitude != -88) %>%
@@ -294,5 +296,14 @@ count_taxda %>%
 ggplot(aes(label = project, color = project, size = n)) +
   geom_text_wordcloud() +
   theme_minimal()
+```
+
+```{r}
+taxda_sepyr %>%
+  filter(year <= 2010) %>%
+  filter(result < 700) %>%
+  ggplot(aes(x=year,  y= result))+
+  scale_y_log10()+
+  geom_point()
 ```
 
